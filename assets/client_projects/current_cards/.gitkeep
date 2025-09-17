@@ -1,0 +1,11 @@
+# Current Business Cards
+
+Upload your clients' existing business cards here.
+
+**File naming convention:**
+- `[client_name]_current_front.png`
+- `[client_name]_current_back.png`
+
+**Recommended format:** High-resolution PNG or JPG (300 DPI preferred)
+
+**Security Note:** These files are excluded from version control for client confidentiality.

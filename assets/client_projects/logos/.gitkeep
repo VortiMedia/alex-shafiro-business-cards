@@ -1,0 +1,17 @@
+# Client Logos & Brand Assets
+
+Upload your clients' logo files and brand assets here.
+
+**Preferred formats:**
+- SVG (vector - best quality)
+- PNG with transparency
+- PDF (vector)
+- AI/EPS (if available)
+
+**File naming convention:**
+- `[client_name]_logo_primary.svg`
+- `[client_name]_logo_horizontal.png` 
+- `[client_name]_logo_icon.svg`
+- `[client_name]_brand_guidelines.pdf`
+
+**Security Note:** These files are excluded from version control for client confidentiality.
