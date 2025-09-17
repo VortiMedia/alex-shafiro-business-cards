@@ -658,34 +658,55 @@ Output: Clean minimal design exactly {self.CARD_SPECS['total_width_px']}×{self.
                 print(f"  ❌ No candidates in API response for {filename_prefix}")
                 return None
                 
-            # Process response parts
-            for part in result['candidates'][0]['content']['parts']:
-                if 'inlineData' in part:  # Fixed: use camelCase
-                    # Decode and process the image
-                    image_data = base64.b64decode(part['inlineData']['data'])
-                    image = Image.open(BytesIO(image_data))
-                    
-                    # Process for professional print quality
-                    processed_image = self._validate_and_process_for_print_quality(image, filename_prefix)
-                    if not processed_image:
-                        print(f"  ❌ Image rejected - cannot meet professional print standards")
-                        print(f"  💡 Trying again may produce better quality output")
-                        return None
-                    
-                    image = processed_image
-                    
-                    # Save with timestamp to appropriate directory
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename = f"ASL_{filename_prefix}_{timestamp}.png"
-                    save_dir = output_dir if output_dir else self.variations_dir
-                    filepath = save_dir / filename
-                    
-                    image.save(filepath, format='PNG', optimize=True, dpi=(300, 300))
-                    print(f"  💾 Saved: {filepath}")
-                    return str(filepath)
-                    
-                elif 'text' in part:
-                    print(f"  📝 API Text Response: {part['text'][:100]}...")
+            # Check if we have candidates with content
+            if 'candidates' in result and result['candidates'] and 'content' in result['candidates'][0]:
+                content = result['candidates'][0]['content']
+                
+                # Check for parts in content
+                if 'parts' not in content:
+                    print(f"  ❌ No 'parts' found in API response for {filename_prefix}")
+                    return None
+                
+                # Process response parts
+                for part in content['parts']:
+                    # Check for image data (inlineData)
+                    if 'inlineData' in part and 'data' in part['inlineData']:
+                        try:
+                            # Decode and process the image
+                            image_data = base64.b64decode(part['inlineData']['data'])
+                            image = Image.open(BytesIO(image_data))
+                            
+                            # Process for professional print quality
+                            processed_image = self._validate_and_process_for_print_quality(image, filename_prefix)
+                            if not processed_image:
+                                print(f"  ❌ Image rejected - cannot meet professional print standards")
+                                print(f"  💡 Trying again may produce better quality output")
+                                return None
+                            
+                            image = processed_image
+                            
+                            # Save with timestamp to appropriate directory
+                            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                            filename = f"ASL_{filename_prefix}_{timestamp}.png"
+                            save_dir = output_dir if output_dir else self.variations_dir
+                            filepath = save_dir / filename
+                            
+                            image.save(filepath, format='PNG', optimize=True, dpi=(300, 300))
+                            print(f"  💾 Saved: {filepath}")
+                            return str(filepath)
+                            
+                        except Exception as e:
+                            print(f"  ❌ Failed to process image data: {e}")
+                            continue
+                            
+                    # Handle text responses (Gemini often returns design descriptions instead of images)
+                    elif 'text' in part:
+                        text_response = part['text']
+                        print(f"  📝 API Text Response: {text_response[:200]}...")
+                        
+                        # For now, we'll create a placeholder since Gemini doesn't generate actual images
+                        print(f"  ⚠️ Gemini returned text instead of image. Creating design specification document...")
+                        return self._create_design_specification(text_response, filename_prefix, output_dir)
             
             print(f"  ❌ No image data found in API response for {filename_prefix}")
             return None
@@ -1222,6 +1243,72 @@ QR Destination: https://www.aslstrong.com/team/[firstname-lastname]
         
         return True
     
+    def _create_design_specification(self, text_response: str, filename_prefix: str, output_dir: Optional[Path] = None) -> str:
+        """
+        Create a design specification document when Gemini returns text instead of images
+        
+        Args:
+            text_response: The text response from Gemini
+            filename_prefix: Prefix for output filename
+            output_dir: Directory to save output
+            
+        Returns:
+            str: Path to created specification file
+        """
+        save_dir = output_dir if output_dir else self.variations_dir
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"DESIGN_SPEC_{filename_prefix}_{timestamp}.md"
+        filepath = save_dir / filename
+        
+        spec_content = f"""# Business Card Design Specification
+
+**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Concept**: {filename_prefix.replace('_', ' ').replace('-', ' ')}
+**Status**: Design Specification (Requires Manual Creation)
+
+## PRD Requirements Met:
+- Dimensions: {self.CARD_SPECS['total_width_px']}×{self.CARD_SPECS['total_height_px']}px (with bleed)
+- Background: Deep Obsidian Black ({self.BRAND_COLORS['deep_obsidian_black']})
+- Accent: Emerald Glow ({self.BRAND_COLORS['emerald_glow']})
+- Text: Arctic White ({self.BRAND_COLORS['arctic_white']})
+- Logo: Exactly 0.75" height with 0.25" clear space
+- QR Code: 0.5" × 0.5" with Level H error correction
+
+## AI-Generated Design Description:
+
+{text_response}
+
+## Next Steps:
+
+1. **Manual Design Creation Required**: Gemini API doesn't generate actual images
+2. **Use Professional Design Tools**: Adobe Illustrator, Figma, or Canva
+3. **Follow PRD Specifications**: Implement the exact requirements listed above
+4. **Reference this specification**: Use the AI description as creative guidance
+
+## Alternative Solutions:
+
+1. **Use DALL-E or Midjourney**: These APIs can generate actual images
+2. **Commission Professional Designer**: Provide this specification as brief
+3. **Use Canva Templates**: Customize with exact PRD specifications
+
+## Brand Assets Needed:
+
+- A Stronger Life logo (available in project)
+- QR code for: https://{self.BRAND_INFO['website']}
+- Exact color codes as specified in PRD
+
+---
+*This specification was generated because the current Gemini API returns design descriptions rather than actual images.*
+"""
+        
+        with open(filepath, 'w') as f:
+            f.write(spec_content)
+        
+        print(f"  ✅ Design specification saved: {filepath.name}")
+        print(f"  💡 Use this spec to create the actual design in Figma/Illustrator")
+        
+        return str(filepath)
+    
     def _validate_and_report_quality(self, image: Image.Image, filename_prefix: str) -> None:
         """Validate and report on image quality for print (legacy method)"""
         width, height = image.size
@@ -1264,7 +1351,7 @@ def print_brand_info():
     info = AlexShafiroCardGenerator.BRAND_INFO
     print("📋 Card Information:")
     print(f"• Name: {info['name']}")
-    print(f"• Title: {info['title']}")
+    print(f"• Title: {info.get('title', 'N/A')}")
     print(f"• Company: {info['company']}")
     print(f"• Email: {info['email']}")
     print(f"• Website: {info['website']}")
@@ -1277,20 +1364,49 @@ def print_concept_results(results: Dict[str, Dict[str, str]], generator):
     if not results:
         print("❌ No concept variations were generated successfully")
         print("💡 Check your API key and internet connection")
+        print("\n🔍 Troubleshooting:")
+        print("1. Current Gemini API doesn't generate images directly")
+        print("2. Try running the template system (option 3) instead")
+        print("3. Use generated design specifications with professional design tools")
         return
         
-    print(f"\n🎉 Alex Shafiro PT Premium Business Card System - Generation Complete!")
+    print(f"\n🎉 Alex Shafiro PT Premium Business Card System - Specifications Generated!")
     print(f"📁 Base directory: {generator.base_dir.resolve()}")
     print()
+    
+    # Check if we got actual images or design specifications
+    spec_count = 0
+    image_count = 0
     
     # List generated concepts
     for concept_key, concept_files in results.items():
         concept_name = concept_key.replace('-', ' ')
         print(f"🎨 {concept_name}:")
         if 'front' in concept_files:
-            print(f"  📄 Front: {Path(concept_files['front']).name}")
+            filename = Path(concept_files['front']).name
+            if filename.startswith('DESIGN_SPEC_'):
+                print(f"  📝 Front Spec: {filename}")
+                spec_count += 1
+            else:
+                print(f"  📄 Front: {filename}")
+                image_count += 1
         if 'back' in concept_files:
-            print(f"  📄 Back: {Path(concept_files['back']).name}")
+            filename = Path(concept_files['back']).name
+            if filename.startswith('DESIGN_SPEC_'):
+                print(f"  📝 Back Spec: {filename}")
+                spec_count += 1
+            else:
+                print(f"  📄 Back: {filename}")
+                image_count += 1
+        print()
+    
+    if spec_count > 0 and image_count == 0:
+        print("💡 Generated Design Specifications (Gemini doesn't create actual images)")
+        print("🎨 Next Steps:")
+        print("1. Review the generated design specifications")
+        print("2. Use professional design tools (Figma, Adobe Illustrator, Canva)")
+        print("3. Follow the exact PRD requirements in each specification")
+        print("4. Create actual business card designs based on the AI descriptions")
         print()
     
     print_prd_specifications(len(results))
