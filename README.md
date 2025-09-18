@@ -1,6 +1,6 @@
-# Alex Shafiro PT - Business Card Generator v1.0
+# Alex Shafiro PT - Business Card Generator v3.0
 
-Generate premium business cards using Google's Gemini 2.5 Flash Image API that actually creates images.
+Dual-model business card generator supporting OpenAI GPT Image 1 and Google Gemini.
 
 ## 🚀 Quick Start
 
@@ -8,9 +8,9 @@ Generate premium business cards using Google's Gemini 2.5 Flash Image API that a
 # 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Set API key
-export GEMINI_API_KEY="your_key_here"
-# Or create .env file: echo "GEMINI_API_KEY=your_key_here" > .env
+# 2. Set API keys (one or both)
+export OPENAI_API_KEY="sk-xxxxx"  # For GPT Image 1
+export GOOGLE_API_KEY="AIzaxxxxx"  # For Gemini
 
 # 3. Generate cards
 python generate_business_cards.py
@@ -43,16 +43,16 @@ python generate_business_cards.py
 ## 🔑 Setup
 
 ### Get API Key
-1. Go to [Google AI Studio](https://aistudio.google.com)
+1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
 2. Generate an API key
 3. Set environment variable:
    ```bash
-   export GEMINI_API_KEY="your_key_here"
+   export OPENAI_API_KEY="your_key_here"
    ```
 
 ### Install Dependencies
 ```bash
-pip install google-genai python-dotenv Pillow
+pip install openai>=1.51.0 python-dotenv Pillow
 ```
 
 ## 🎯 Usage Options
@@ -81,14 +81,12 @@ ASL_Alex_Shafiro_Athletic-Edge_front_20250918_132002.png
 
 ## 💰 Cost
 
-~$0.02 per card generated (~$0.12 for all 6 cards)
+~$0.02-$0.19 per card (high quality default, ~$0.12-$1.14 for all 6 cards)
 
-## 🔧 Technical
+## 🔧 Technical Details
 
-**SDK**: Google GenAI SDK (`google-genai>=1.0.0`)  
-**API**: Gemini 2.5 Flash Image for actual image generation  
-**Output**: High-quality PNG files, not text descriptions
+- **Models**: OpenAI GPT Image 1 + Google Gemini 2.5 Flash Image
+- **SDKs**: `openai>=1.51.0`, `google-genai>=1.0.0`
+- **Output**: PNG files optimized for professional printing
 
----
-
-**This actually generates images.** Uses Google's Gemini 2.5 Flash Image API with the latest Google GenAI SDK for real image creation.
+📚 **Full documentation**: See [`aidocs/MASTER_IMPLEMENTATION_GUIDE.md`](aidocs/MASTER_IMPLEMENTATION_GUIDE.md)

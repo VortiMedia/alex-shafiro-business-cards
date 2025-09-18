@@ -1,13 +1,11 @@
-# Alex Shafiro PT Business Card Generator
-# Using Google GenAI SDK for Gemini 2.5 Flash Image generation
+# Business Card Generator - Dual Model Support
+# Supports both OpenAI GPT Image 1 and Google Gemini
 
 # Core dependencies
-requests>=2.31.0
 python-dotenv>=1.0.0
 Pillow>=10.0.0
+requests>=2.31.0
 
-# AI Image Generation (NEW Google GenAI SDK)
-google-genai>=1.0.0
-
-# Optional: Alternative image generation
-# openai>=1.0.0  # For DALL-E if Gemini doesn't work
+# AI Image Generation
+openai>=1.51.0      # OpenAI GPT Image 1
+google-genai>=1.0.0  # Google Gemini 2.5 Flash Image
