@@ -1,11 +1,13 @@
-# Alex Shafiro PT Business Card Generator Dependencies
-# Minimal required packages for core functionality
+# Alex Shafiro PT Business Card Generator
+# Using Google GenAI SDK for Gemini 2.5 Flash Image generation
 
-# API and HTTP
+# Core dependencies
 requests>=2.31.0
-
-# Environment variables
 python-dotenv>=1.0.0
+Pillow>=10.0.0
 
-# Image processing
-Pillow>=10.1.0
+# AI Image Generation (NEW Google GenAI SDK)
+google-genai>=1.0.0
+
+# Optional: Alternative image generation
+# openai>=1.0.0  # For DALL-E if Gemini doesn't work
