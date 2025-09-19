@@ -1,0 +1,51 @@
+# Development and testing dependencies
+# Business Card Generator v4.0
+
+# Testing framework
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.12.0
+pytest-xdist>=3.3.0        # Parallel test execution
+
+# Code quality and linting
+flake8>=6.0.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Security scanning
+bandit>=1.7.5
+safety>=2.3.0
+
+# Performance testing
+locust>=2.15.0
+
+# API testing
+httpx>=0.24.0
+pytest-httpx>=0.21.0
+
+# Web development dependencies (for Sprint 4)
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+jinja2>=3.1.2
+aiofiles>=23.2.0
+
+# Redis caching
+redis>=5.0.0
+aioredis>=2.0.0
+
+# Background processing
+celery>=5.3.0
+
+# Monitoring and logging
+prometheus-client>=0.17.0
+structlog>=23.1.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.2.0
+
+# Development utilities
+ipython>=8.14.0
+pre-commit>=3.3.0
