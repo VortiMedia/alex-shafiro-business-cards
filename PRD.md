@@ -1,5 +1,5 @@
 Alex Shafiro PT Business Card System
-Product Requirements Document & Development PlanExecutive SummaryThis PRD outlines a multi-stage, iterative workflow for generating expert-level business cards using Gemini 2.5 Flash Image API. The system employs progressive refinement with decreasing creative freedom at each stage to achieve precise, print-ready designs.Core Problem AnalysisCurrent Issues Identified:
+Product Requirements Document & Development PlanExecutive SummaryThis PRD outlines a multi-stage, iterative workflow for generating expert-level business cards using OpenAI's GPT Image 1 API. The system employs progressive refinement with decreasing creative freedom at each stage to achieve precise, print-ready designs with superior text rendering.Core Problem AnalysisCurrent Issues Identified:
 
 Mockup Presentation: Getting 3D cards on backgrounds instead of flat artboards
 Shadow/Depth Effects: Despite requesting flat designs, receiving dimensional presentations
@@ -139,8 +139,8 @@ pythondef generate_concepts():
     for variation in ["centered", "dynamic", "classic"]:
         for i in range(3):
             prompt = create_concept_prompt(variation, i)
-            image = generate_with_gemini(prompt, temp=0.85)
-            save_to_grid(image, f"{variation}_{i}")Phase 3: Progressive Refinement
+            image = generate_with_gpt_image_1(prompt, quality='high')
+            save_to_grid(image, f"{variation}_{i}")
 pythondef refine_selected(selections):
     """Stage 2 & 3: Add assets and text"""
     for selected in selections:

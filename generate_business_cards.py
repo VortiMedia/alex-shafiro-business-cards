@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Alex Shafiro PT - Business Card Generator
-Using Nano Banana (Gemini 2.5 Flash Image) approach for actual image generation
+Alex Shafiro PT - Business Card Generator v2.0
+Using OpenAI's GPT Image 1 for state-of-the-art image generation
 
-Based on: nano-banana-python model for real image creation
-NOT text descriptions - this actually generates images
+Production-ready system that generates print-ready business cards
+NOT text descriptions - this actually generates PNG images with superior quality
 """
 
 import os
@@ -15,21 +15,22 @@ from typing import Optional, Dict
 
 # Check dependencies
 try:
-    from google import genai
+    from openai import OpenAI
     from PIL import Image
     from dotenv import load_dotenv
     import base64
     import io
+    import json
 except ImportError as e:
     print(f"❌ Missing dependency: {e}")
-    print("Install with: pip install google-genai python-dotenv Pillow")
+    print("Install with: pip install openai python-dotenv Pillow")
     sys.exit(1)
 
 # Load environment variables
 load_dotenv()
 
 class BusinessCardGenerator:
-    """Generate Alex Shafiro PT business cards using Gemini image generation"""
+    """Generate Alex Shafiro PT business cards using OpenAI's GPT Image 1"""
     
     # Brand specifications from PRD
     BRAND_INFO = {
@@ -57,25 +58,25 @@ class BusinessCardGenerator:
         self.setup_directories()
         
     def setup_api(self):
-        """Setup Gemini API client using new GenAI SDK"""
-        api_key = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
+        """Setup OpenAI API client for GPT Image 1"""
+        api_key = os.getenv('OPENAI_API_KEY')
         
         if not api_key:
             print("❌ API Key not found!")
             print("Setup instructions:")
-            print("1. Get key from: https://aistudio.google.com")
+            print("1. Get key from: https://platform.openai.com/api-keys")
             print("2. Set environment variable:")
-            print("   export GEMINI_API_KEY='your_key_here'")
-            print("3. Or create .env file with: GEMINI_API_KEY=your_key_here")
+            print("   export OPENAI_API_KEY='your_key_here'")
+            print("3. Or create .env file with: OPENAI_API_KEY=your_key_here")
             sys.exit(1)
             
         try:
-            # Create the new GenAI client
-            self.client = genai.Client(api_key=api_key)
-            print("✅ Google GenAI client initialized")
-            print("✨ Image generation ready (Gemini 2.5 Flash Image)")
+            # Create the OpenAI client
+            self.client = OpenAI(api_key=api_key)
+            print("✅ OpenAI client initialized")
+            print("✨ Image generation ready (GPT Image 1 - Latest Model)")
         except Exception as e:
-            print(f"❌ Failed to initialize GenAI client: {e}")
+            print(f"❌ Failed to initialize OpenAI client: {e}")
             sys.exit(1)
     
     def setup_directories(self):
@@ -96,7 +97,7 @@ class BusinessCardGenerator:
         """
         print(f"\n🎨 Generating front card - {concept.replace('-', ' ')}...")
         
-        # Craft the prompt using nano-banana best practices
+        # Craft the prompt using OpenAI GPT Image 1 best practices
         prompt = f"""Ultra-premium business card front design with these EXACT specifications:
 
 **SUBJECT & CONTEXT:**
@@ -184,7 +185,7 @@ Output a sophisticated business card back design ready for immediate printing.""
     
     def _generate_image(self, prompt: str, filename_prefix: str) -> Optional[str]:
         """
-        Generate actual image using Gemini 2.5 Flash Image and save to file
+        Generate actual image using OpenAI's GPT Image 1 and save to file
         
         Args:
             prompt: Text prompt for image generation
@@ -194,28 +195,34 @@ Output a sophisticated business card back design ready for immediate printing.""
             Path to saved image or None if failed
         """
         try:
-            print(f"  🎨 Calling Gemini 2.5 Flash Image API...")
+            print(f"  🎨 Calling OpenAI GPT Image 1 API...")
             
-            # Generate image using the new GenAI SDK 
-            response = self.client.models.generate_content(
-                model='gemini-2.5-flash-image-preview',
-                contents=[prompt]
+            # Generate image using OpenAI's latest model
+            response = self.client.images.generate(
+                model='gpt-image-1',
+                prompt=prompt,
+                size='1536x1024',  # Wider format better for business cards
+                quality='high',     # High quality for professional printing
+                n=1                 # Generate 1 image at a time
             )
             
             # Check if we got a valid response
-            if not response.candidates or len(response.candidates) == 0:
-                print(f"  ❌ No candidates in response")
+            if not response.data or len(response.data) == 0:
+                print(f"  ❌ No image data in response")
                 return None
-                
-            # Look for image data in the response parts
-            image_data = None
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data is not None:
-                    image_data = part.inline_data.data
-                    break
             
-            if image_data is None:
-                print(f"  ❌ No image data found in response")
+            # Get the base64 encoded image data
+            image_b64 = response.data[0].b64_json
+            
+            if not image_b64:
+                print(f"  ❌ No base64 image data found")
+                return None
+            
+            # Decode base64 to bytes
+            try:
+                image_data = base64.b64decode(image_b64)
+            except Exception as decode_err:
+                print(f"  ❌ Failed to decode base64 image: {decode_err}")
                 return None
             
             # Create timestamp for unique filename
@@ -223,7 +230,7 @@ Output a sophisticated business card back design ready for immediate printing.""
             filename = f"ASL_Alex_Shafiro_{filename_prefix}_{timestamp}.png"
             filepath = self.output_dir / filename
             
-            # Save the image - image_data is raw bytes from inline_data
+            # Save the image
             try:
                 with open(filepath, 'wb') as f:
                     f.write(image_data)
@@ -239,11 +246,12 @@ Output a sophisticated business card back design ready for immediate printing.""
             print(f"  ✅ Image generated successfully: {filename}")
             print(f"  📏 File size: {filepath.stat().st_size / 1024:.1f} KB")
             
-            # Optional: Display image info using PIL
+            # Display image info using PIL
             try:
                 with Image.open(filepath) as img:
                     print(f"  🖼️ Dimensions: {img.width}x{img.height} pixels")
                     print(f"  🎨 Format: {img.format} ({img.mode})")
+                    print(f"  💎 Quality: High (GPT Image 1 Premium)")
             except Exception as img_err:
                 print(f"  ⚠️ Could not read image info: {img_err}")
             
@@ -253,12 +261,14 @@ Output a sophisticated business card back design ready for immediate printing.""
             print(f"  ❌ Image generation failed: {e}")
             print(f"  📝 Error type: {type(e).__name__}")
             # Try to provide more helpful error messages
-            if 'quota' in str(e).lower():
-                print(f"  💳 This might be a quota/billing issue. Check your Google Cloud billing.")
-            elif 'auth' in str(e).lower():
-                print(f"  🔑 This might be an authentication issue. Check your API key.")
-            elif 'permission' in str(e).lower():
-                print(f"  🔒 This might be a permissions issue. Ensure image generation is enabled.")
+            if 'quota' in str(e).lower() or 'limit' in str(e).lower():
+                print(f"  💳 This might be a quota/billing issue. Check your OpenAI usage limits.")
+            elif 'auth' in str(e).lower() or 'api' in str(e).lower():
+                print(f"  🔑 This might be an authentication issue. Check your OPENAI_API_KEY.")
+            elif 'content_policy' in str(e).lower():
+                print(f"  🚫 Content policy violation. Try adjusting your prompt.")
+            elif 'invalid' in str(e).lower():
+                print(f"  ⚠️ Invalid request. Check model name and parameters.")
             
             return None
     

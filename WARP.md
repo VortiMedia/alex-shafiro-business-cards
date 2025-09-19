@@ -4,16 +4,18 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-**Alex Shafiro PT Business Card Generator v1.0** - A Python command-line application that generates premium business cards using Google's Gemini 2.5 Flash Image API. Produces print-ready PNG files with actual AI image generation.
+**Alex Shafiro PT Business Card Generator v2.0** - A Python command-line application that generates premium business cards using OpenAI's GPT Image 1 API. Produces print-ready PNG files with state-of-the-art AI image generation.
 
 ## Key Architecture
 
 ### Core Components
-- **`generate_business_cards.py`** - Main generator (429 lines, fully functional)
-- **Google GenAI SDK** - Uses `google-genai>=1.0.0` with `gemini-2.5-flash-image-preview` model
+- **`generate_business_cards.py`** - Main generator supporting dual models
+- **Dual Model Support**:
+  - OpenAI: `gpt-image-1` via `openai>=1.51.0` SDK
+  - Google: `gemini-2.5-flash-image-preview` via `google-genai` SDK
 - **Business card concepts** - Three variations: Clinical Precision, Athletic Edge, Luxury Wellness
 - **Brand system** - Deep matte black (#0A0A0A) with emerald accent (#00C9A7)
-- **Interactive CLI** - Menu-driven interface for generating single or multiple concepts
+- **Interactive CLI** - Menu-driven interface with model selection
 
 ### Design Philosophy
 "Equinox meets Mayo Clinic" - Premium luxury aesthetic with medical credibility. Sophisticated minimalism over embellishment.
@@ -26,9 +28,9 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 pip install -r requirements.txt
 
 # 2. Set API key (required)
-export GEMINI_API_KEY="your_key_here"
+export OPENAI_API_KEY="your_key_here"
 # OR create .env file
-echo "GEMINI_API_KEY=your_key_here" > .env
+echo "OPENAI_API_KEY=your_key_here" > .env
 
 # 3. Generate cards
 python generate_business_cards.py
@@ -51,11 +53,7 @@ python -c "from google import genai; print('✅ Ready')"
 
 ## Technical Details
 
-### API Implementation
-- **Uses Google GenAI SDK** - `google-genai>=1.0.0` with Gemini 2.5 Flash Image
-- **Generates actual PNG images** - Not text descriptions
-- **Cost**: ~$0.005 per image (~$0.03 for complete 6-card set)
-- **Quality**: 1024x1024 pixels, suitable for professional printing
+See [`aidocs/MASTER_IMPLEMENTATION_GUIDE.md`](aidocs/MASTER_IMPLEMENTATION_GUIDE.md) for complete implementation details.
 
 ### Print Specifications
 - **Size**: 3.5" × 2.0" business card standard
@@ -88,8 +86,8 @@ python -c "from google import genai; print('✅ Ready')"
 ## Common Issues & Solutions
 
 ### API Problems
-- **Missing API key**: Check `GEMINI_API_KEY` environment variable
-- **Import errors**: Run `pip install google-genai python-dotenv Pillow`
+- **Missing API key**: Check `OPENAI_API_KEY` environment variable
+- **Import errors**: Run `pip install openai python-dotenv Pillow`
 - **Generation failures**: Verify internet connection and API quota
 
 ### Quality Issues
@@ -99,15 +97,7 @@ python -c "from google import genai; print('✅ Ready')"
 
 ## Dependencies
 
-### Core Requirements
-- `google-genai>=1.0.0` - For Gemini 2.5 Flash Image API access
-- `python-dotenv>=1.0.0` - Environment variable management  
-- `Pillow>=10.0.0` - Image processing and validation
-- `requests>=2.31.0` - HTTP client for API calls
-
-### Python Version
-- **Minimum**: Python 3.10+ (required for nano-banana)
-- **Recommended**: Python 3.12+ (current project uses 3.12.2)
+See `requirements.txt` for current dependencies. Supports Python 3.10+.
 
 ## Business Logic
 
