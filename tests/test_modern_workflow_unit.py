@@ -16,7 +16,7 @@ import sys
 sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 from hybrid.modern_workflow import ModernHybridWorkflow, ModelType, GenerationResult
-from fixtures.mock_openai import create_mock_openai_success, TINY_PNG
+from fixtures.mock_openai import create_mock_openai_success, TINY_PNG, BUSINESS_CARD_PNG
 from fixtures.mock_gemini import create_mock_gemini_success
 
 class TestModelSelection:
@@ -47,8 +47,14 @@ class TestModelSelection:
         # Only OpenAI available
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test123456789012345678")
         monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
         
-        with patch('hybrid.modern_workflow.OpenAI'), patch('hybrid.modern_workflow.genai'):
+        with patch('hybrid.modern_workflow.OpenAI') as mock_openai, \
+             patch('hybrid.modern_workflow.genai') as mock_genai:
+            # Setup mocks - OpenAI works, Gemini fails
+            mock_openai.return_value = create_mock_openai_success()
+            mock_genai.Client.side_effect = Exception("No API key")
+            
             wf = ModernHybridWorkflow()
             chosen = wf._select_model(ModelType.AUTO, "draft")
             assert chosen == ModelType.GPT_IMAGE_1  # Falls back to GPT
@@ -68,8 +74,14 @@ class TestModelSelection:
         # Only OpenAI available
         monkeypatch.setenv("OPENAI_API_KEY", "sk-test123456789012345678")
         monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
         
-        with patch('hybrid.modern_workflow.OpenAI'), patch('hybrid.modern_workflow.genai'):
+        with patch('hybrid.modern_workflow.OpenAI') as mock_openai, \
+             patch('hybrid.modern_workflow.genai') as mock_genai:
+            # Setup mocks - OpenAI works, Gemini fails
+            mock_openai.return_value = create_mock_openai_success()
+            mock_genai.Client.side_effect = Exception("No API key")
+            
             wf = ModernHybridWorkflow()
             chosen = wf._select_model(ModelType.GEMINI_FLASH, "production")
             assert chosen == ModelType.GPT_IMAGE_1  # Falls back
@@ -83,9 +95,9 @@ class TestImageValidation:
         with patch('hybrid.modern_workflow.OpenAI'), patch('hybrid.modern_workflow.genai'):
             wf = ModernHybridWorkflow()
             
-            # Should not raise exception for valid PNG
+            # Should not raise exception for validation-compliant PNG (1536x1024)
             try:
-                wf._validate_image(TINY_PNG)
+                wf._validate_image(BUSINESS_CARD_PNG)
                 assert True
             except ValueError:
                 pytest.fail("Valid PNG should pass validation")

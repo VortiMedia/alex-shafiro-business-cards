@@ -2,14 +2,39 @@
 """
 Mock Google Gemini API responses for testing
 Provides success, error, and edge case scenarios without real API calls
+
+Updated for Sprint 3: Mock images are now validation-compliant (1024x1024)
 """
 
 import base64
+import io
 from unittest.mock import MagicMock
 from dataclasses import dataclass
 from typing import Optional
 
-# Minimal valid PNG (1x1 transparent pixel) - same as OpenAI mock
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
+def create_test_png(width=1024, height=1024, color=(10, 10, 10, 255)):
+    """Generate validation-compliant PNG for Gemini tests"""
+    if not Image:
+        # Fallback to tiny PNG if PIL not available
+        return base64.b64decode(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP4BwQACfsD/IbLr9YAAAAASUVORK5CYII="
+        )
+    
+    img = Image.new('RGBA', (width, height), color)
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG', quality=95)
+    return buffer.getvalue()
+
+# Square format (1024×1024) - matches Gemini 2.5 Flash Image output
+# Deep matte black background to match brand specs (#0A0A0A)
+SQUARE_PNG = create_test_png(1024, 1024, (10, 10, 10, 255))
+
+# Fallback tiny PNG for error scenarios
 TINY_PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGP4BwQACfsD/IbLr9YAAAAASUVORK5CYII="
 )
@@ -40,17 +65,17 @@ class MockGeminiResponse:
     candidates: list
 
 def create_mock_gemini_success():
-    """Create successful Gemini API mock"""
+    """Create successful Gemini API mock with validation-compliant image"""
     mock_client = MagicMock()
     
-    # Create response with image data in parts
+    # Create response with validation-compliant image data (1024x1024)
     mock_response = MockGeminiResponse(
         candidates=[
             MockCandidate(
                 content=MockContent(
                     parts=[
                         MockContentPart(
-                            inline_data=MockInlineData(data=TINY_PNG)
+                            inline_data=MockInlineData(data=SQUARE_PNG)
                         )
                     ]
                 )
