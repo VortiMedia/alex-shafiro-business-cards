@@ -1,36 +1,35 @@
-# Master Implementation Guide: Dual Model Business Card Generator
+# Implementation Guide: Business Card Generator v3.0
 
-**Version**: 3.0  
-**Date**: September 18, 2025  
-**Models**: OpenAI GPT Image 1 + Google Gemini 2.5 Flash Image Preview
-
----
+**Production-ready dual-model AI business card generator**
 
 ## Quick Start
 
-### Install Dependencies
 ```bash
-pip install openai>=1.51.0 google-genai>=1.0.0 python-dotenv Pillow requests
+# Install
+pip install -r requirements.txt
+
+# Configure
+export OPENAI_API_KEY="sk-xxxxx"
+export GOOGLE_API_KEY="AIzaxxxxx" 
+
+# Run
+python generate_business_cards.py
 ```
 
-### Set API Keys
-```bash
-# .env file
-OPENAI_API_KEY=sk-xxxxx
-GOOGLE_API_KEY=AIzaxxxxx
-```
+## Architecture
 
----
+**Core Components:**
+- `generate_business_cards.py` - Main CLI application
+- `src/hybrid/modern_workflow.py` - Dual-model generation engine
+- `src/validation/` - Image validation system
+- `src/monitoring/` - API status monitoring
+- `tests/` - Comprehensive test suite (93.4% coverage)
 
-## Model Specifications
-
-| Feature | GPT Image 1 | Gemini 2.5 Flash Image |
-|---------|-------------|------------------------|
-| **SDK** | `openai` | `google-genai` |
-| **Model ID** | `gpt-image-1` | `gemini-2.5-flash-image-preview` |
-| **Cost** | $0.02-$0.19 | ~$0.005 |
-| **Resolution** | 1536x1024 | 1024x1024 |
-| **Best For** | Production, text-heavy | Drafts, rapid testing |
+**Model Strategy:**
+| Use Case | Model | Cost | Resolution |
+|----------|-------|------|-----------|
+| **Draft/Review** | Gemini | $0.005 | 1024×1024 |
+| **Production** | GPT Image 1 | $0.02-$0.19 | 1536×1024 |
 
 ---
 
