@@ -107,8 +107,8 @@ class TestCostEstimation:
         total_cost = generator.estimate_total_cost(concepts, "draft")
         single_cost = generator.estimate_concept_cost("draft")
         
-        # Should be approximately 6x single cost (3 concepts x 2 cards each)
-        expected_cost = single_cost * 6
+        # Should be 3x single cost (3 concepts, where single_cost already includes front+back)
+        expected_cost = single_cost * len(concepts)
         assert abs(total_cost - expected_cost) < 0.001
 
 

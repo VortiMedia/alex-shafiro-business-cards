@@ -385,14 +385,21 @@ BACK CARD LAYOUT:
         filename = f"ASL_Alex_Shafiro_{concept}_{side}_{model_short}_{timestamp}.png"
         filepath = directory / filename
         
-        with open(filepath, 'wb') as f:
-            f.write(image_data)
+        # Ensure parent directory exists before writing
+        filepath.parent.mkdir(parents=True, exist_ok=True)
         
-        # Verify file was created successfully
-        if not filepath.exists() or filepath.stat().st_size == 0:
-            raise ValueError("Failed to save image file")
+        try:
+            with open(filepath, 'wb') as f:
+                f.write(image_data)
             
-        return str(filepath)
+            # Verify file was created successfully
+            if not filepath.exists() or filepath.stat().st_size == 0:
+                raise ValueError("Failed to create image file")
+                
+            return str(filepath)
+            
+        except Exception as e:
+            raise ValueError(f"Image save failed: {e}")
 
     def generate_full_concept_set(
         self, 

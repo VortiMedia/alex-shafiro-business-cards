@@ -296,11 +296,12 @@ class TestWorkflowRecommendations:
         """No APIs should recommend configuration"""
         monkeypatch.delenv("OPENAI_API_KEY", raising=False)
         monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+        monkeypatch.delenv("GEMINI_API_KEY", raising=False)
         
         recommendation = recommend_workflow()
         
         assert "No workflow available" in recommendation
-        assert "configure API keys" in recommendation.lower()
+        assert "configure api keys" in recommendation.lower()
 
 
 class TestEnvironmentValidation:
